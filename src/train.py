@@ -18,15 +18,20 @@ import tensorflow as tf
 import threading
 
 from config import *
-from dataset import pascal_voc, kitti
+from dataset import pascal_voc, kitti, coco
 from utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
 from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('dataset', 'KITTI',
+# tf.app.flags.DEFINE_string('dataset', 'KITTI',
+#                            """Currently only support KITTI dataset.""")
+# tf.app.flags.DEFINE_string('data_path', '.\\data\\KITTI', """Root directory of data""")
+tf.app.flags.DEFINE_string('dataset', 'COCO',
                            """Currently only support KITTI dataset.""")
-tf.app.flags.DEFINE_string('data_path', '.\\data\\KITTI', """Root directory of data""")
+tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\dataset\\', """Root directory of data""")
+
+
 tf.app.flags.DEFINE_string('image_set', 'train',
                            """ Can be train, trainval, val, or test""")
 tf.app.flags.DEFINE_string('year', '2007',
@@ -101,38 +106,33 @@ def _viz_prediction_result(model, images, bboxes, labels, batch_det_bbox,
 
 def train():
   """Train SqueezeDet model"""
-  assert FLAGS.dataset == 'KITTI', \
-      'Currently only support KITTI dataset'
+  # assert FLAGS.dataset == 'KITTI', \
+  #     'Currently only support KITTI dataset'
 
   os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
 
   with tf.Graph().as_default():
 
-    assert FLAGS.net == 'vgg16' or FLAGS.net == 'resnet50' \
-        or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
+    assert FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
         'Selected neural net architecture not supported: {}'.format(FLAGS.net)
-    if FLAGS.net == 'vgg16':
-      mc = kitti_vgg16_config()
-      mc.IS_TRAINING = True
-      mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
-      model = VGG16ConvDet(mc)
-    elif FLAGS.net == 'resnet50':
-      mc = kitti_res50_config()
-      mc.IS_TRAINING = True
-      mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
-      model = ResNet50ConvDet(mc)
-    elif FLAGS.net == 'squeezeDet':
-      mc = kitti_squeezeDet_config()
+    
+    
+    if FLAGS.net == 'squeezeDet':
+      mc = coco_config()
+      # mc = kitti_squeezeDet_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDet(mc)
     elif FLAGS.net == 'squeezeDet+':
-      mc = kitti_squeezeDetPlus_config()
+      # mc = kitti_squeezeDetPlus_config()
+      mc = coco_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDetPlus(mc)
 
-    imdb = kitti(FLAGS.image_set, FLAGS.data_path, mc)
+    # imdb = kitti(FLAGS.image_set, FLAGS.data_path, mc)
+    imdb = coco(FLAGS.image_set, FLAGS.data_path, mc)
+
 
     # save model size, flops, activations by layers
     with open(os.path.join(FLAGS.train_dir, 'model_metrics.txt'), 'w') as f:

@@ -8,13 +8,11 @@ import numpy as np
 from easydict import EasyDict as edict
 
 def base_model_config(dataset='PASCAL_VOC'):
-  assert dataset.upper()=='PASCAL_VOC' or dataset.upper()=='KITTI', \
-      'Currently only support PASCAL_VOC or KITTI dataset'
-
   cfg = edict()
 
-  # Dataset used to train/val/test model. Now support PASCAL_VOC or KITTI
+  # Dataset used to train/val/test model. 
   cfg.DATASET = dataset.upper()
+
 
   if cfg.DATASET == 'PASCAL_VOC':
     # object categories to classify
@@ -24,6 +22,16 @@ def base_model_config(dataset='PASCAL_VOC'):
                        'sofa', 'train', 'tvmonitor')
   elif cfg.DATASET == 'KITTI':
     cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist')
+  elif cfg.DATASET == 'IMAGETAGGER':
+    cfg.CLASS_NAMES = ('ball')
+  elif cfg.DATASET == 'COCO': 
+    cfg.CLASS_NAMES =  ('person', 'bicycle', 'car', 'motorcycle', 'airplane','bus', 'train', 'truck', 'boat', 'traffic_light','fire_hydrant', 'stop_sign', 'parking_meter', 
+                        'bench', 'bird','cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear','zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase',
+                        'frisbee', 'skis', 'snowboard', 'sports_ball','kite', 'baseball_bat', 'baseball_glove', 'skateboard','surfboard', 'tennis_racket', 'bottle', 
+                        'wine_glass', 'cup','fork', 'knife', 'spoon', 'bowl', 'banana', 'apple','sandwich', 'orange', 'broccoli', 'carrot', 'hot_dog', 'pizza','donut',
+                        'cake', 'chair', 'couch', 'potted_plant', 'bed','dining_table', 'toilet', 'tv', 'laptop', 'mouse', 'remote','keyboard', 'cell_phone', 'microwave', 
+                        'oven', 'toaster','sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors','teddy_bear', 'hair_drier', 'toothbrush')
+        
 
   # number of categories to classify
   cfg.CLASSES = len(cfg.CLASS_NAMES)    

@@ -1,39 +1,39 @@
 # Author: Bichen Wu (bichen@berkeley.edu) 08/25/2016
 
-"""Model configuration for pascal dataset"""
+"""Model configuration for COCO dataset"""
 
 import numpy as np
 
 from config.config import base_model_config
 
-def kitti_vgg16_config():
+def coco_config():
   """Specify the parameters to tune below."""
-  mc                       = base_model_config('KITTI')
+  mc = base_model_config('COCO')
 
-  mc.IMAGE_WIDTH           = 1242
-  mc.IMAGE_HEIGHT          = 375
-  mc.BATCH_SIZE            = 5
+  mc.IMAGE_WIDTH = 256 #1248
+  mc.IMAGE_HEIGHT = 256 #384
+  mc.BATCH_SIZE = 20
 
-  mc.WEIGHT_DECAY          = 0.0001
-  mc.LEARNING_RATE         = 0.01
-  mc.DECAY_STEPS           = 10000
-  mc.MAX_GRAD_NORM         = 1.0
-  mc.MOMENTUM              = 0.9
-  mc.LR_DECAY_FACTOR       = 0.5
+  mc.WEIGHT_DECAY = 0.0001
+  mc.LEARNING_RATE = 0.01
+  mc.DECAY_STEPS = 10000
+  mc.MAX_GRAD_NORM = 1.0
+  mc.MOMENTUM = 0.9
+  mc.LR_DECAY_FACTOR = 0.5
 
-  mc.LOSS_COEF_BBOX        = 5.0
-  mc.LOSS_COEF_CONF_POS    = 75.0
-  mc.LOSS_COEF_CONF_NEG    = 100.0
-  mc.LOSS_COEF_CLASS       = 1.0
+  mc.LOSS_COEF_BBOX = 5.0
+  mc.LOSS_COEF_CONF_POS = 75.0
+  mc.LOSS_COEF_CONF_NEG = 100.0
+  mc.LOSS_COEF_CLASS = 1.0
 
-  mc.PLOT_PROB_THRESH      = 0.4
-  mc.NMS_THRESH            = 0.4
-  mc.PROB_THRESH           = 0.005
-  mc.TOP_N_DETECTION       = 64
+  mc.PLOT_PROB_THRESH = 0.4
+  mc.NMS_THRESH = 0.4
+  mc.PROB_THRESH = 0.005
+  mc.TOP_N_DETECTION = 64
 
-  mc.DATA_AUGMENTATION     = True
-  mc.DRIFT_X               = 150
-  mc.DRIFT_Y               = 100
+  mc.DATA_AUGMENTATION = True
+  mc.DRIFT_X = 150
+  mc.DRIFT_Y = 100
   mc.EXCLUDE_HARD_EXAMPLES = False
 
   mc.ANCHOR_BOX            = set_anchors(mc)
@@ -43,7 +43,7 @@ def kitti_vgg16_config():
   return mc
 
 def set_anchors(mc):
-  H, W, B = 24, 78, 9
+  H, W, B = 16, 16, 9 # 24, 78, 9
   anchor_shapes = np.reshape(
       [np.array(
           [[  36.,  37.], [ 366., 174.], [ 115.,  59.],

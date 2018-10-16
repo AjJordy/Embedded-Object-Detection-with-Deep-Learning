@@ -1,6 +1,6 @@
 # Author: Bichen Wu (bichen@berkeley.edu) 08/25/2016
 
-"""Image data base class for kitti"""
+"""Image data base class for ImageTagger"""
 
 import cv2
 import os 
@@ -10,9 +10,9 @@ import subprocess
 from dataset.imdb import imdb
 from utils.util import bbox_transform_inv, batch_iou
 
-class kitti(imdb):
+class ImageTagger(imdb):
   def __init__(self, image_set, data_path, mc):
-    imdb.__init__(self, 'kitti_'+image_set, mc)
+    imdb.__init__(self, 'ImageTagger_'+image_set, mc)
     self._image_set = image_set
     self._data_root_path = data_path
     self._image_path = os.path.join(self._data_root_path, 'training', 'image_2')
@@ -24,7 +24,7 @@ class kitti(imdb):
     self._image_idx = self._load_image_set_idx() 
     # a dict of image_idx -> [[cx, cy, w, h, cls_idx]]. x,y,w,h are not divided by
     # the image width and height
-    self._rois = self._load_kitti_annotation()
+    self._rois = self._load_ImageTagger_annotation()
 
     ## batch reader ##
     self._perm_idx = None
@@ -50,52 +50,13 @@ class kitti(imdb):
         'Image does not exist: {}'.format(image_path)
     return image_path
 
-  def _load_kitti_annotation(self):
-    def _get_obj_level(obj):
-      height = float(obj[7]) - float(obj[5]) + 1
-      truncation = float(obj[1])
-      occlusion = float(obj[2])
-      if height >= 40 and truncation <= 0.15 and occlusion <= 0:
-          return 1
-      elif height >= 25 and truncation <= 0.3 and occlusion <= 1:
-          return 2
-      elif height >= 25 and truncation <= 0.5 and occlusion <= 2:
-          return 3
-      else:
-          return 4
-
-    idx2annotation = {}
-    for index in self._image_idx:
-      filename = os.path.join(self._label_path, index+'.txt')
-      with open(filename, 'r') as f:
-        lines = f.readlines()
-      f.close()
-      bboxes = []
-      for line in lines:
-        obj = line.strip().split(' ')
-        try:
-          cls = self._class_to_idx[obj[0].lower().strip()]
-        except:
-          continue
-
-        if self.mc.EXCLUDE_HARD_EXAMPLES and _get_obj_level(obj) > 3:
-          continue
-        xmin = float(obj[4])
-        ymin = float(obj[5])
-        xmax = float(obj[6])
-        ymax = float(obj[7])
-        assert xmin >= 0.0 and xmin <= xmax, \
-            'Invalid bounding box x-coord xmin {} or xmax {} at {}.txt' \
-                .format(xmin, xmax, index)
-        assert ymin >= 0.0 and ymin <= ymax, \
-            'Invalid bounding box y-coord ymin {} or ymax {} at {}.txt' \
-                .format(ymin, ymax, index)
-        x, y, w, h = bbox_transform_inv([xmin, ymin, xmax, ymax])
-        bboxes.append([x, y, w, h, cls])
-
-      idx2annotation[index] = bboxes
-
-    return idx2annotation
+  def _load_ImageTagger_annotation(self,data,img_name):
+    annotations = []
+    for bb in data[img_name]:
+        ann = bb[:]
+        ann[4] = 0
+        annotations.append(ann)
+    return annotations
 
   def evaluate_detections(self, eval_dir, global_step, all_boxes):
     """Evaluate detection results.
@@ -118,7 +79,7 @@ class kitti(imdb):
       with open(filename, 'wt') as f:
         for cls_idx, cls in enumerate(self._classes):
           dets = all_boxes[cls_idx][im_idx]
-          for k in range(len(dets)):
+          for k in xrange(len(dets)):
             f.write(
                 '{:s} -1 -1 0.0 {:.2f} {:.2f} {:.2f} {:.2f} 0.0 0.0 0.0 0.0 0.0 '
                 '0.0 0.0 {:.3f}\n'.format(
