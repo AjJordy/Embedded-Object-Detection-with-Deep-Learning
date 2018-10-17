@@ -12,8 +12,7 @@ def base_model_config(dataset='PASCAL_VOC'):
 
   # Dataset used to train/val/test model. 
   cfg.DATASET = dataset.upper()
-
-
+  
   if cfg.DATASET == 'PASCAL_VOC':
     # object categories to classify
     cfg.CLASS_NAMES = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',

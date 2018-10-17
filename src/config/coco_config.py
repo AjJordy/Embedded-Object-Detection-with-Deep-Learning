@@ -12,10 +12,10 @@ def coco_config():
 
   mc.IMAGE_WIDTH = 256 #1248
   mc.IMAGE_HEIGHT = 256 #384
-  mc.BATCH_SIZE = 20
+  mc.BATCH_SIZE = 15
 
   mc.WEIGHT_DECAY = 0.0001
-  mc.LEARNING_RATE = 0.01
+  mc.LEARNING_RATE = 0.001
   mc.DECAY_STEPS = 10000
   mc.MAX_GRAD_NORM = 1.0
   mc.MOMENTUM = 0.9
@@ -36,9 +36,9 @@ def coco_config():
   mc.DRIFT_Y = 100
   mc.EXCLUDE_HARD_EXAMPLES = False
 
-  mc.ANCHOR_BOX            = set_anchors(mc)
-  mc.ANCHORS               = len(mc.ANCHOR_BOX)
-  mc.ANCHOR_PER_GRID       = 9
+  mc.ANCHOR_BOX = set_anchors(mc)
+  mc.ANCHORS = len(mc.ANCHOR_BOX)
+  mc.ANCHOR_PER_GRID = 9
 
   return mc
 
@@ -46,8 +46,8 @@ def set_anchors(mc):
   H, W, B = 16, 16, 9 # 24, 78, 9
   anchor_shapes = np.reshape(
       [np.array(
-          [[  36.,  37.], [ 366., 174.], [ 115.,  59.],
-           [ 162.,  87.], [  38.,  90.], [ 258., 173.],
+          [[  36.,  37.], [ 230., 174.], [ 115.,  59.],
+           [ 162.,  87.], [  38.,  90.], [ 180., 173.],
            [ 224., 108.], [  78., 170.], [  72.,  43.]])] * H * W,
       (H, W, B, 2)
   )
