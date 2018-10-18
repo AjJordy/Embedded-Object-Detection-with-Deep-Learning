@@ -1,7 +1,7 @@
 data/KITTI
 data/out
 data/model_checkpoints
-logs/
+logs/squeezeDet/train
 data/RoboCup.mp4
 data/sample.png
 data/frame0029.png
