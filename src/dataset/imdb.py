@@ -5,10 +5,10 @@
 import os
 import random
 import shutil
-
 from PIL import Image, ImageFont, ImageDraw
 import cv2
 import numpy as np
+
 from utils.util import iou, batch_iou
 
 class imdb(object):
@@ -147,7 +147,7 @@ class imdb(object):
       # load annotations
       label_per_batch.append([b[4] for b in self._rois[idx][:]])
       gt_bbox = np.array([[b[0], b[1], b[2], b[3]] for b in self._rois[idx][:]])
-
+      
       if mc.DATA_AUGMENTATION:
         assert mc.DRIFT_X >= 0 and mc.DRIFT_Y > 0, \
             'mc.DRIFT_X and mc.DRIFT_Y must be >= 0'

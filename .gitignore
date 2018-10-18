@@ -2,4 +2,6 @@ data/KITTI
 data/out
 data/model_checkpoints
 logs/
-
+data/RoboCup.mp4
+data/sample.png
+data/frame0029.png

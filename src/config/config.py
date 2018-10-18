@@ -20,9 +20,7 @@ def base_model_config(dataset='PASCAL_VOC'):
                        'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
                        'sofa', 'train', 'tvmonitor')
   elif cfg.DATASET == 'KITTI':
-    cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist')
-  elif cfg.DATASET == 'IMAGETAGGER':
-    cfg.CLASS_NAMES = ('ball')
+    cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist')  
   elif cfg.DATASET == 'COCO': 
     cfg.CLASS_NAMES =  ('person', 'bicycle', 'car', 'motorcycle', 'airplane','bus', 'train', 'truck', 'boat', 'traffic_light','fire_hydrant', 'stop_sign', 'parking_meter', 
                         'bench', 'bird','cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear','zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase',
@@ -30,7 +28,8 @@ def base_model_config(dataset='PASCAL_VOC'):
                         'wine_glass', 'cup','fork', 'knife', 'spoon', 'bowl', 'banana', 'apple','sandwich', 'orange', 'broccoli', 'carrot', 'hot_dog', 'pizza','donut',
                         'cake', 'chair', 'couch', 'potted_plant', 'bed','dining_table', 'toilet', 'tv', 'laptop', 'mouse', 'remote','keyboard', 'cell_phone', 'microwave', 
                         'oven', 'toaster','sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors','teddy_bear', 'hair_drier', 'toothbrush')
-        
+  elif cfg.DATASET == 'BALL':
+    cfg.CLASS_NAMES = ('ball','')     
 
   # number of categories to classify
   cfg.CLASSES = len(cfg.CLASS_NAMES)    

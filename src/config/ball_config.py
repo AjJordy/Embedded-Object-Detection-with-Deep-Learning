@@ -6,9 +6,9 @@ import numpy as np
 
 from config.config import base_model_config
 
-def imagetagger_squeezeDet_config():
+def ball_config():
   """Specify the parameters to tune below."""
-  mc = base_model_config('ImageTagger')
+  mc = base_model_config('BALL')
 
   mc.IMAGE_WIDTH = 256 #1248
   mc.IMAGE_HEIGHT = 256 #384
@@ -36,9 +36,9 @@ def imagetagger_squeezeDet_config():
   mc.DRIFT_Y = 100
   mc.EXCLUDE_HARD_EXAMPLES = False
 
-  mc.ANCHOR_BOX            = set_anchors(mc)
-  mc.ANCHORS               = len(mc.ANCHOR_BOX)
-  mc.ANCHOR_PER_GRID       = 9
+  mc.ANCHOR_BOX  = set_anchors(mc)
+  mc.ANCHORS = len(mc.ANCHOR_BOX)
+  mc.ANCHOR_PER_GRID = 9
 
   return mc
 
@@ -46,9 +46,9 @@ def set_anchors(mc):
   H, W, B = 16, 16, 9 # 24, 78, 9
   anchor_shapes = np.reshape(
       [np.array(
-          [[  36.,  37.], [ 366., 174.], [ 115.,  59.],
-           [ 162.,  87.], [  38.,  90.], [ 258., 173.],
-           [ 224., 108.], [  78., 170.], [  72.,  43.]])] * H * W,
+          [[  5.,  5.], [ 10., 10.], [ 15.,  15.],
+           [ 20.,  20.], [  30.,  30.], [ 40., 40.],
+           [ 50., 50.], [  70., 70.], [  90.,  90.]])] * H * W,
       (H, W, B, 2)
   )
   center_x = np.reshape(

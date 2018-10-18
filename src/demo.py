@@ -27,14 +27,30 @@ from nets import *
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string(
-    'mode', 'image', """'image' or 'video'.""")
+    'mode', 'video', """'image' or 'video'.""")
+# tf.app.flags.DEFINE_string(
+#     'checkpoint', '.\\data\\model_checkpoints\\squeezeDet\\model.ckpt-87000',
+#     """Path to the model parameter file.""")
+# tf.app.flags.DEFINE_string(
+#     'input_path', '.\\data\\sample.png',
+#     """Input image or video to be detected. Can process glob input such as """
+#     """./data/00000*.png.""")
+
 tf.app.flags.DEFINE_string(
-    'checkpoint', '.\\data\\model_checkpoints\\squeezeDet\\model.ckpt-87000',
-    """Path to the model parameter file.""")
-tf.app.flags.DEFINE_string(
-    'input_path', '.\\data\\sample.png',
+    'input_path', '.\\data\\RoboCup.mp4',
     """Input image or video to be detected. Can process glob input such as """
     """./data/00000*.png.""")
+
+# tf.app.flags.DEFINE_string(
+#     'input_path', '.\\data\\frame0029.png',
+#     """Input image or video to be detected. Can process glob input such as """
+#     """./data/00000*.png.""")
+
+tf.app.flags.DEFINE_string(
+    'checkpoint', '.\\logs\\squeezeDet\\train\\model.ckpt-4999',
+    """Path to the model parameter file.""")
+
+
 tf.app.flags.DEFINE_string(
     'out_dir', '.\\data\\out\\', """Directory to dump output image or video.""")
 tf.app.flags.DEFINE_string(
@@ -48,10 +64,11 @@ def video_demo():
     # Define the codec and create VideoWriter object
     # fourcc = cv2.cv.CV_FOURCC(*'XVID')
     # fourcc = cv2.cv.CV_FOURCC(*'MJPG')
-    # in_file_name = os.path.split(FLAGS.input_path)[1]
-    # out_file_name = os.path.join(FLAGS.out_dir, 'out_'+in_file_name)
-    # out = cv2.VideoWriter(out_file_name, fourcc, 30.0, (375,1242), True)
-    # out = VideoWriter(out_file_name, frameSize=(1242, 375))
+    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    in_file_name = os.path.split(FLAGS.input_path)[1]
+    out_file_name = os.path.join(FLAGS.out_dir, 'out_'+in_file_name)
+    out = cv2.VideoWriter(out_file_name, fourcc, 30.0, (256,256), True)
+    # out = VideoWriter(out_file_name, frameSize=(256, 256))
     # out.open()    
 
     assert FLAGS.demo_net == 'squeezeDet' or FLAGS.demo_net == 'squeezeDet+', \
@@ -61,13 +78,15 @@ def video_demo():
     with tf.Graph().as_default():
         # Load model
         if FLAGS.demo_net == 'squeezeDet':
-            mc = kitti_squeezeDet_config()
+            # mc = kitti_squeezeDet_config()
+            mc = ball_config()
             mc.BATCH_SIZE = 1
             # model parameters will be restored from checkpoint
             mc.LOAD_PRETRAINED_MODEL = False
             model = SqueezeDet(mc, FLAGS.gpu)
         elif FLAGS.demo_net == 'squeezeDet+':
-            mc = kitti_squeezeDetPlus_config()
+            # mc = kitti_squeezeDetPlus_config()
+            mc = ball_config()
             mc.BATCH_SIZE = 1
             mc.LOAD_PRETRAINED_MODEL = False
             model = SqueezeDetPlus(mc, FLAGS.gpu)
@@ -88,9 +107,10 @@ def video_demo():
 
                 # Load images from video and crop
                 ret, frame = cap.read()
+                frame = cv2.resize(frame, (256, 256)) 
                 if ret == True:
                     # crop frames
-                    frame = frame[500:-205, 239:-439, :]
+                    # frame = frame[500:-205, 239:-439, :]
                     im_input = frame.astype(np.float32) - mc.BGR_MEANS
                 else:
                     break
@@ -122,11 +142,12 @@ def video_demo():
                 # Draw boxes
 
                 # TODO(bichen): move this color dict to configuration file
-                cls2clr = {
-                    'car': (255, 191, 0),
-                    'cyclist': (0, 191, 255),
-                    'pedestrian': (255, 0, 191)
-                }
+                # cls2clr = {
+                #     'car': (255, 191, 0),
+                #     'cyclist': (0, 191, 255),
+                #     'pedestrian': (255, 0, 191)
+                # }
+                cls2clr = {'ball': (255, 191, 0)}
                 _draw_box(
                     frame, final_boxes,
                     [mc.CLASS_NAMES[idx]+': (%.2f)' % prob
@@ -137,8 +158,8 @@ def video_demo():
                 t_draw = time.time()
                 times['draw'] = t_draw - t_filter
 
-                cv2.imwrite(out_im_name, frame)
-                # out.write(frame)
+                # cv2.imwrite(out_im_name, frame)
+                out.write(frame)
 
                 times['total'] = time.time() - t_start
 
@@ -170,13 +191,15 @@ def image_demo():
     with tf.Graph().as_default():
         # Load model
         if FLAGS.demo_net == 'squeezeDet':
-            mc = kitti_squeezeDet_config()
+            # mc = kitti_squeezeDet_config()
+            mc = ball_config()
             mc.BATCH_SIZE = 1
             # model parameters will be restored from checkpoint
             mc.LOAD_PRETRAINED_MODEL = False
             model = SqueezeDet(mc, FLAGS.gpu)
         elif FLAGS.demo_net == 'squeezeDet+':
             mc = kitti_squeezeDetPlus_config()
+            # mc = ball_config()
             mc.BATCH_SIZE = 1
             mc.LOAD_PRETRAINED_MODEL = False
             model = SqueezeDetPlus(mc, FLAGS.gpu)

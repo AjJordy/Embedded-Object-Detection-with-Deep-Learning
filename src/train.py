@@ -18,19 +18,25 @@ import tensorflow as tf
 import threading
 
 from config import *
-from dataset import pascal_voc, kitti, coco
+from dataset import pascal_voc, kitti, coco, ball
 from utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
 from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('dataset', 'KITTI',
-                           """Currently only support KITTI dataset.""")
-tf.app.flags.DEFINE_string('data_path', '.\\data\\KITTI', """Root directory of data""")
+# tf.app.flags.DEFINE_string('dataset', 'KITTI',
+#                            """ """)
+# tf.app.flags.DEFINE_string('data_path', '.\\data\\KITTI', """Root directory of data""")
 
 # tf.app.flags.DEFINE_string('dataset', 'COCO', 
-# 							"""Currently only support KITTI dataset.""")
-# tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\dataset\\', """Root directory of data""")
+# 							""" """)
+# tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\dataset\\', 
+# 							"""Root directory of data""")
+
+tf.app.flags.DEFINE_string('dataset', 'BALL', 
+							""" """)
+tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\imagetagger\\', 
+							"""Root directory of data""")
 
 tf.app.flags.DEFINE_string('image_set', 'train',
 							""" Can be train, trainval, val, or test""")
@@ -40,7 +46,7 @@ tf.app.flags.DEFINE_string('year', '2007',
 tf.app.flags.DEFINE_string('train_dir', 'logs\\squeezeDet\\train',
 							"""Directory where to write event logs """
 							"""and checkpoint.""")
-tf.app.flags.DEFINE_integer('max_steps', 1000, #1000000,
+tf.app.flags.DEFINE_integer('max_steps', 5000, #1000000,
 							"""Maximum number of batches to run.""")
 tf.app.flags.DEFINE_string('net', 'squeezeDet',
 							"""Neural net architecture. """)
@@ -118,16 +124,23 @@ def train():
 		if FLAGS.net == 'squeezeDet':			
 			if FLAGS.dataset == 'COCO':
 				mc = coco_config()
+				print("COCO")
 			elif FLAGS.dataset == 'KITTI':
 				mc = kitti_squeezeDet_config()
+				print("KITTI")
+			elif FLAGS.dataset == 'BALL':
+				mc = ball_config()
+				print("BALL")
 			mc.IS_TRAINING = True
 			mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
-			model = SqueezeDet(mc)
+			model = SqueezeDet(mc)			
 		elif FLAGS.net == 'squeezeDet+':
 			if FLAGS.dataset == 'COCO':
 				mc = coco_config()
 			elif FLAGS.dataset == 'KITTI':
 				mc = kitti_squeezeDet_config()
+			elif FLAGS.dataset == 'BALL':
+				mc = ball_config()
 			mc.IS_TRAINING = True
 			mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
 			model = SqueezeDetPlus(mc)
@@ -136,6 +149,8 @@ def train():
 			imdb = coco(FLAGS.image_set, FLAGS.data_path, mc)
 		elif FLAGS.dataset == 'KITTI':
 			imdb = kitti(FLAGS.image_set, FLAGS.data_path, mc)
+		elif FLAGS.dataset == 'BALL':
+			imdb= ball(FLAGS.image_set, FLAGS.data_path, mc)
 
 
 		# save model size, flops, activations by layers
@@ -165,7 +180,7 @@ def train():
 			os.path.join(FLAGS.train_dir, 'model_metrics.txt')))
 
 		def _load_data(load_to_placeholder=True):
-			# read batch input
+			# read batch input			 
 			image_per_batch, label_per_batch, box_delta_per_batch, aidx_per_batch, \
 					bbox_per_batch = imdb.read_batch()
 
