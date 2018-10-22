@@ -1,4 +1,14 @@
-# Author: Bichen Wu (bichen@berkeley.edu) 08/25/2016
+## Original project
+# Author: Bichen Wu 
+# Date: 08/25/2016
+# Email: bichen@berkeley.edu
+
+## Edited project
+# Author: Jordy A. Faria de Araújo
+# Date: 25/07/2018
+# Email: jordyfaria0@gmail.com
+# Github: AjJordy
+
 
 """Base Model configurations"""
 

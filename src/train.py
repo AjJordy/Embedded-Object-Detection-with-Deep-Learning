@@ -1,4 +1,13 @@
-# Author: Bichen Wu (bichen@berkeley.edu) 08/25/2016
+## Original project
+# Author: Bichen Wu 
+# Date: 08/25/2016
+# Email: bichen@berkeley.edu
+
+## Edited project
+# Author: Jordy A. Faria de Araújo
+# Date: 25/07/2018
+# Email: jordyfaria0@gmail.com
+# Github: AjJordy
 
 """Train"""
 
@@ -11,7 +20,6 @@ from datetime import datetime
 import os.path
 import sys
 import time
-
 import numpy as np
 from six.moves import xrange
 import tensorflow as tf
@@ -24,32 +32,26 @@ from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
-# tf.app.flags.DEFINE_string('dataset', 'KITTI',
-#                            """ """)
+# tf.app.flags.DEFINE_string('dataset', 'KITTI', """ For autonomous drive """)
 # tf.app.flags.DEFINE_string('data_path', '.\\data\\KITTI', """Root directory of data""")
 
-# tf.app.flags.DEFINE_string('dataset', 'COCO', 
-# 							""" """)
-# tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\dataset\\', 
-# 							"""Root directory of data""")
+# tf.app.flags.DEFINE_string('dataset', 'COCO',""" For COCO dataset""")
+# tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\dataset\\', """ Root directory of data""")
 
-tf.app.flags.DEFINE_string('dataset', 'BALL', 
-							""" """)
-tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\imagetagger\\', 
-							"""Root directory of data""")
+tf.app.flags.DEFINE_string('dataset', 'BALL',""" For ball dataset """)
+tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\imagetagger\\', """Root directory of data""")
+
+# tf.app.flags.DEFINE_string('net', 'squeezeDet', """Neural net architecture. """)
+tf.app.flags.DEFINE_string('net', 'squeezeDetSmall', """Small version Neural net architecture. """)
 
 tf.app.flags.DEFINE_string('image_set', 'train',
 							""" Can be train, trainval, val, or test""")
-tf.app.flags.DEFINE_string('year', '2007',
-							"""VOC challenge year. 2007 or 2012"""
-							"""Only used for Pascal VOC dataset""")
+# tf.app.flags.DEFINE_string('year', '2007',
+# 							"""VOC challenge year. 2007 or 2012 Only used for Pascal VOC dataset""")
 tf.app.flags.DEFINE_string('train_dir', 'logs\\squeezeDet\\train',
-							"""Directory where to write event logs """
-							"""and checkpoint.""")
-tf.app.flags.DEFINE_integer('max_steps', 5000, #1000000,
+							"""Directory where to write event logs and checkpoint.""")
+tf.app.flags.DEFINE_integer('max_steps', 8000, #1000000,
 							"""Maximum number of batches to run.""")
-tf.app.flags.DEFINE_string('net', 'squeezeDet',
-							"""Neural net architecture. """)
 tf.app.flags.DEFINE_string('pretrained_model_path', '.\\data\\SqueezeNet\\squeezenet_v1.1.pkl',
 							"""Path to the pretrained model.""")
 tf.app.flags.DEFINE_integer('summary_step', 10,
@@ -117,33 +119,31 @@ def train():
 
 	with tf.Graph().as_default():
 
-		assert FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
+		assert FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+' or FLAGS.net == 'squeezeDetSmall', \
 				'Selected neural net architecture not supported: {}'.format(FLAGS.net)
 		
-		
-		if FLAGS.net == 'squeezeDet':			
-			if FLAGS.dataset == 'COCO':
-				mc = coco_config()
-				print("COCO")
-			elif FLAGS.dataset == 'KITTI':
-				mc = kitti_squeezeDet_config()
-				print("KITTI")
-			elif FLAGS.dataset == 'BALL':
-				mc = ball_config()
-				print("BALL")
+		if FLAGS.dataset == 'COCO':
+			mc = coco_config()
+			print("COCO")
+		elif FLAGS.dataset == 'KITTI':
+			mc = kitti_squeezeDet_config()
+			print("KITTI")
+		elif FLAGS.dataset == 'BALL':
+			mc = ball_config()
+			print("BALL")
+
+		if FLAGS.net == 'squeezeDet':
 			mc.IS_TRAINING = True
 			mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
 			model = SqueezeDet(mc)			
 		elif FLAGS.net == 'squeezeDet+':
-			if FLAGS.dataset == 'COCO':
-				mc = coco_config()
-			elif FLAGS.dataset == 'KITTI':
-				mc = kitti_squeezeDet_config()
-			elif FLAGS.dataset == 'BALL':
-				mc = ball_config()
 			mc.IS_TRAINING = True
 			mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
 			model = SqueezeDetPlus(mc)
+		elif FLAGS.net == 'squeezeDetSmall':			
+			mc.IS_TRAINING = True
+			mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
+			model = SqueezeDetSmall(mc)
 
 		if FLAGS.dataset == 'COCO':
 			imdb = coco(FLAGS.image_set, FLAGS.data_path, mc)

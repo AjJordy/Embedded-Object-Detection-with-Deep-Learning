@@ -1,4 +1,14 @@
-# Author: Bichen Wu (bichen@berkeley.edu) 08/25/2016
+## Original project
+# Author: Bichen Wu 
+# Date: 08/25/2016
+# Email: bichen@berkeley.edu
+
+## Edited project
+# Author: Jordy A. Faria de Araújo
+# Date: 25/07/2018
+# Email: jordyfaria0@gmail.com
+# Github: AjJordy
+
 
 """SqueezeDet Demo.
 
@@ -28,9 +38,15 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string(
     'mode', 'video', """'image' or 'video'.""")
+
 # tf.app.flags.DEFINE_string(
 #     'checkpoint', '.\\data\\model_checkpoints\\squeezeDet\\model.ckpt-87000',
 #     """Path to the model parameter file.""")
+
+tf.app.flags.DEFINE_string(
+    'checkpoint', '.\\logs\\squeezeDet\\train\\model.ckpt-7000',
+    """Path to the model parameter file.""")
+
 # tf.app.flags.DEFINE_string(
 #     'input_path', '.\\data\\sample.png',
 #     """Input image or video to be detected. Can process glob input such as """
@@ -45,11 +61,6 @@ tf.app.flags.DEFINE_string(
 #     'input_path', '.\\data\\frame0029.png',
 #     """Input image or video to be detected. Can process glob input such as """
 #     """./data/00000*.png.""")
-
-tf.app.flags.DEFINE_string(
-    'checkpoint', '.\\logs\\squeezeDet\\train\\model.ckpt-4999',
-    """Path to the model parameter file.""")
-
 
 tf.app.flags.DEFINE_string(
     'out_dir', '.\\data\\out\\', """Directory to dump output image or video.""")
@@ -83,7 +94,7 @@ def video_demo():
             mc.BATCH_SIZE = 1
             # model parameters will be restored from checkpoint
             mc.LOAD_PRETRAINED_MODEL = False
-            model = SqueezeDet(mc, FLAGS.gpu)
+            model = SqueezeDetSmall(mc, FLAGS.gpu)
         elif FLAGS.demo_net == 'squeezeDet+':
             # mc = kitti_squeezeDetPlus_config()
             mc = ball_config()
@@ -196,10 +207,10 @@ def image_demo():
             mc.BATCH_SIZE = 1
             # model parameters will be restored from checkpoint
             mc.LOAD_PRETRAINED_MODEL = False
-            model = SqueezeDet(mc, FLAGS.gpu)
+            model = SqueezeDetSmall(mc, FLAGS.gpu)
         elif FLAGS.demo_net == 'squeezeDet+':
-            mc = kitti_squeezeDetPlus_config()
-            # mc = ball_config()
+            # mc = kitti_squeezeDetPlus_config()
+            mc = ball_config()
             mc.BATCH_SIZE = 1
             mc.LOAD_PRETRAINED_MODEL = False
             model = SqueezeDetPlus(mc, FLAGS.gpu)

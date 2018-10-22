@@ -1,6 +1,16 @@
-# Author: Bichen Wu (bichen@berkeley.edu) 08/25/2016
+## Original project
+# Author: Bichen Wu 
+# Date: 08/25/2016
+# Email: bichen@berkeley.edu
 
-"""Model configuration for pascal dataset"""
+## Edited project
+# Author: Jordy A. Faria de Araújo
+# Date: 25/07/2018
+# Email: jordyfaria0@gmail.com
+# Github: AjJordy
+
+
+"""Model configuration for ImageTagger only ball dataset"""
 
 import numpy as np
 
@@ -26,7 +36,7 @@ def ball_config():
   mc.LOSS_COEF_CONF_NEG = 100.0
   mc.LOSS_COEF_CLASS = 1.0
 
-  mc.PLOT_PROB_THRESH = 0.4
+  mc.PLOT_PROB_THRESH = 0.7
   mc.NMS_THRESH = 0.4
   mc.PROB_THRESH = 0.005
   mc.TOP_N_DETECTION = 64
