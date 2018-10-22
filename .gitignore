@@ -1,6 +1,3 @@
-data/KITTI
-data/model_checkpoints
+data/
 logs/squeezeDet
-data/RoboCup.mp4
-data/sample.png
-data/frame0029.png
+
