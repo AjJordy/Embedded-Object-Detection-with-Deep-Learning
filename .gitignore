@@ -1,5 +1,4 @@
 data/KITTI
-data/out
 data/model_checkpoints
 logs/squeezeDet
 data/RoboCup.mp4
