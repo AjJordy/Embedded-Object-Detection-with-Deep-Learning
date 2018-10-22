@@ -1,7 +1,6 @@
-## _SqueezeDet:_ Unified, Small, Low Power Fully Convolutional Neural Networks for Real-Time Object Detection for Autonomous Driving
-By Bichen Wu, Alvin Wan, Forrest Iandola, Peter H. Jin, Kurt Keutzer (UC Berkeley & DeepScale)
+## SqueezeDet
 
-This repository contains a tensorflow implementation of SqueezeDet, a convolutional neural network based object detector described in our paper: https://arxiv.org/abs/1612.01051. If you find this work useful for your research, please consider citing:
+This repository contains a tensorflow implementation of SqueezeDet, a convolutional neural network based object detector described in this paper: https://arxiv.org/abs/1612.01051. If you find this work useful for your research, please consider citing:
 
     @inproceedings{squeezedet,
         Author = {Bichen Wu and Forrest Iandola and Peter H. Jin and Kurt Keutzer},
@@ -14,27 +13,7 @@ This repository contains a tensorflow implementation of SqueezeDet, a convolutio
 
 The following instructions are written for Linux-based distros.
 
-- Clone the SqueezeDet repository:
-
-  ```Shell
-  git clone https://github.com/BichenWuUCB/squeezeDet.git
-  ```
-  Let's call the top level directory of SqueezeDet `$SQDT_ROOT`. 
-
-- (Optional) Setup your own virtual environment.
-
-  1. The following assumes `python` is the Python2.7 executable. Navigate to your user home directory, and create the virtual environment there.
-  
-    ```Shell
-    cd ~
-    virtualenv env --python=python
-    ```
-    
-  2. Launch the virtual environment.
-  
-    ```Shell
-    source env/bin/activate
-    ```
+Let's call the top level directory of SqueezeDet `$SQDT_ROOT`. 
     
 - Use pip to install required Python packages:
     
@@ -50,7 +29,6 @@ The following instructions are written for Linux-based distros.
   tar -xzvf model_checkpoints.tgz
   rm model_checkpoints.tgz
   ```
-
 
 - Now we can run the demo. To detect the sample image `$SQDT_ROOT/data/sample.png`,
 
@@ -105,38 +83,7 @@ The following instructions are written for Linux-based distros.
   # SqueezeNet
   wget https://www.dropbox.com/s/fzvtkc42hu3xw47/SqueezeNet.tgz
   tar -xzvf SqueezeNet.tgz
-  # ResNet50 
-  wget https://www.dropbox.com/s/p65lktictdq011t/ResNet.tgz
-  tar -xzvf ResNet.tgz
-  # VGG16
-  wget https://www.dropbox.com/s/zxd72nj012lzrlf/VGG16.tgz
-  tar -xzvf VGG16.tgz
-  ```
-
-- Now we can start training. Training script can be found in `$SQDT_ROOT/scripts/train.sh`, which contains commands to train 4 models: SqueezeDet, SqueezeDet+, VGG16+ConvDet, ResNet50+ConvDet. 
-  ```Shell
-  cd $SQDT_ROOT/
-  ./scripts/train.sh -net (squeezeDet|squeezeDet+|vgg16|resnet50) -train_dir /tmp/bichen/logs/squeezedet -gpu 0
-  ```
-
-  Training logs are saved to the directory specified by `-train_dir`. GPU id is specified by `-gpu`. Network to train is specificed by `-net` 
-
-- Before evaluation, you need to first compile the official evaluation script of KITTI dataset
-  ```Shell
-  cd $SQDT_ROOT/src/dataset/kitti-eval
-  make
-  ```
-
-- Then, you can launch the evaluation script (in parallel with training) by 
-
-  ```Shell
-  cd $SQDT_ROOT/
-  ./scripts/eval.sh -net (squeezeDet|squeezeDet+|vgg16|resnet50) -eval_dir /tmp/bichen/logs/squeezedet -image_set (train|val) -gpu 1
-  ```
-
-  Note that `-train_dir` in the training script should be the same as `-eval_dir` in the evaluation script to make it easy for tensorboard to load logs. 
-
-  You can run two evaluation scripts to simultaneously evaluate the model on training and validation set. The training script keeps dumping checkpoint (model parameters) to the training directory once every 1000 steps (step size can be changed). Once a new checkpoint is saved, evaluation threads load the new checkpoint file and evaluate them on training and validation set. 
+  
 
 - Finally, to monitor training and evaluation process, you can use tensorboard by
 
