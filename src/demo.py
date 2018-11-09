@@ -37,14 +37,14 @@ from nets import *
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string(
-    'mode', 'video', """'image' or 'video'.""")
+    'mode', 'image', """'image' or 'video'.""")
 
 # tf.app.flags.DEFINE_string(
 #     'checkpoint', '.\\data\\model_checkpoints\\squeezeDet\\model.ckpt-87000',
 #     """Path to the model parameter file.""")
 
 tf.app.flags.DEFINE_string(
-    'checkpoint', '.\\logs\\squeezeDet\\train\\model.ckpt-7000',
+    'checkpoint', '.\\logs\\model.ckpt-7999',
     """Path to the model parameter file.""")
 
 # tf.app.flags.DEFINE_string(
@@ -52,15 +52,15 @@ tf.app.flags.DEFINE_string(
 #     """Input image or video to be detected. Can process glob input such as """
 #     """./data/00000*.png.""")
 
-tf.app.flags.DEFINE_string(
-    'input_path', '.\\data\\RoboCup.mp4',
-    """Input image or video to be detected. Can process glob input such as """
-    """./data/00000*.png.""")
-
 # tf.app.flags.DEFINE_string(
-#     'input_path', '.\\data\\frame0029.png',
+#     'input_path', '.\\data\\RoboCup.mp4',
 #     """Input image or video to be detected. Can process glob input such as """
 #     """./data/00000*.png.""")
+
+tf.app.flags.DEFINE_string(
+    'input_path', '.\\data\\jan16_seq__001.537.jpg',
+    """Input image or video to be detected. Can process glob input such as """
+    """./data/00000*.png.""")
 
 tf.app.flags.DEFINE_string(
     'out_dir', '.\\data\\out\\', """Directory to dump output image or video.""")
@@ -94,7 +94,7 @@ def video_demo():
             mc.BATCH_SIZE = 1
             # model parameters will be restored from checkpoint
             mc.LOAD_PRETRAINED_MODEL = False
-            model = SqueezeDetSmall(mc, FLAGS.gpu)
+            model = SqueezeDet(mc, FLAGS.gpu)
         elif FLAGS.demo_net == 'squeezeDet+':
             # mc = kitti_squeezeDetPlus_config()
             mc = ball_config()
@@ -207,7 +207,7 @@ def image_demo():
             mc.BATCH_SIZE = 1
             # model parameters will be restored from checkpoint
             mc.LOAD_PRETRAINED_MODEL = False
-            model = SqueezeDetSmall(mc, FLAGS.gpu)
+            model = SqueezeDet(mc, FLAGS.gpu)
         elif FLAGS.demo_net == 'squeezeDet+':
             # mc = kitti_squeezeDetPlus_config()
             mc = ball_config()

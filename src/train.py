@@ -41,13 +41,12 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('dataset', 'BALL',""" For ball dataset """)
 tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\Embedded_Object_Detection\\imagetagger\\', """Root directory of data""")
 
-# tf.app.flags.DEFINE_string('net', 'squeezeDet', """Neural net architecture. """)
-tf.app.flags.DEFINE_string('net', 'squeezeDetSmall', """Small version Neural net architecture. """)
+tf.app.flags.DEFINE_string('net', 'squeezeDet', """Neural net architecture. """)
+# tf.app.flags.DEFINE_string('net', 'squeezeDetSmall', """Small version Neural net architecture. """)
 
 tf.app.flags.DEFINE_string('image_set', 'train',
 							""" Can be train, trainval, val, or test""")
-# tf.app.flags.DEFINE_string('year', '2007',
-# 							"""VOC challenge year. 2007 or 2012 Only used for Pascal VOC dataset""")
+# tf.app.flags.DEFINE_string('year', '2007', """VOC challenge year. 2007 or 2012 Only used for Pascal VOC dataset""")
 tf.app.flags.DEFINE_string('train_dir', 'logs\\squeezeDet\\train',
 							"""Directory where to write event logs and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 8000, #1000000,

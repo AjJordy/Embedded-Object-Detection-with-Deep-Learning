@@ -22,10 +22,10 @@ def ball_config():
 
   mc.IMAGE_WIDTH = 256 #1248
   mc.IMAGE_HEIGHT = 256 #384
-  mc.BATCH_SIZE = 20
+  mc.BATCH_SIZE = 25
 
   mc.WEIGHT_DECAY = 0.0001
-  mc.LEARNING_RATE = 0.01
+  mc.LEARNING_RATE = 0.001 #0.01
   mc.DECAY_STEPS = 10000
   mc.MAX_GRAD_NORM = 1.0
   mc.MOMENTUM = 0.9

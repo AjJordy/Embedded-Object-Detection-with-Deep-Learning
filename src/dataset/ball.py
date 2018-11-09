@@ -30,9 +30,9 @@ class ball(imdb):
 		self._image_set = image_set
 		self._data_root_path = data_path
 		self._image_path = os.path.join(
-			self._data_root_path, 'training', 'image_2')
+			self._data_root_path, 'image_2') #'training', 'image_2')
 		self._label_path = os.path.join(
-			self._data_root_path, 'training', 'label_2')
+			self._data_root_path, 'label_2')#'training', 'label_2')
 		self._classes = self.mc.CLASS_NAMES
 		self._class_to_idx = dict(zip(self.classes, range(self.num_classes)))
 
@@ -48,11 +48,10 @@ class ball(imdb):
 		# TODO(bichen): add a random seed as parameter
 		self._shuffle_image_idx()
 
-		# self._eval_tool = './src/dataset/kitti-eval/cpp/evaluate_object'
+		self._eval_tool = './src/dataset/kitti-eval/cpp/evaluate_object'
 
 	def _load_image_set_idx(self):
-		image_set_file = os.path.join(
-			self._data_root_path, 'ImageSets', self._image_set+'.txt')
+		image_set_file = os.path.join( self._data_root_path, 'ImageSets', self._image_set+'.txt' )
 		assert os.path.exists(image_set_file), \
 			'File does not exist: {}'.format(image_set_file)
 
@@ -125,7 +124,7 @@ class ball(imdb):
 						)
 
 		cmd = self._eval_tool + ' ' \
-			+ os.path.join(self._data_root_path, 'training') + ' ' \
+			+ self._data_root_path + ' ' \
 			+ os.path.join(self._data_root_path, 'ImageSets',
 						   self._image_set+'.txt') + ' ' \
 			+ os.path.dirname(det_file_dir) + ' ' + str(len(self._image_idx))
@@ -141,18 +140,18 @@ class ball(imdb):
 			if os.path.exists(det_file_name):
 				with open(det_file_name, 'r') as f:
 					lines = f.readlines()
-				assert len(lines) == 3, \
-					'Line number of {} should be 3'.format(det_file_name)
+				assert len(lines) == 1, \
+					'Line number of {} should be 1'.format(det_file_name)
 
 				aps.append(float(lines[0].split('=')[1].strip()))
-				aps.append(float(lines[1].split('=')[1].strip()))
-				aps.append(float(lines[2].split('=')[1].strip()))
+				# aps.append(float(lines[1].split('=')[1].strip()))
+				# aps.append(float(lines[2].split('=')[1].strip()))
 			else:
-				aps.extend([0.0, 0.0, 0.0])
+				aps.extend([0.0])
 
-			names.append(cls+'_easy')
-			names.append(cls+'_medium')
-			names.append(cls+'_hard')
+			# names.append(cls+'_easy')
+			# names.append(cls+'_medium')
+			# names.append(cls+'_hard')
 
 		return aps, names
 
@@ -169,7 +168,7 @@ class ball(imdb):
 		stats = self.analyze_detections(det_file_dir, det_error_file)
 		ims = self.visualize_detections(
 			image_dir=self._image_path,
-			image_format='.png',
+			image_format='.jpg',
 			det_error_file=det_error_file,
 			output_image_dir=det_error_dir,
 			num_det_per_type=10

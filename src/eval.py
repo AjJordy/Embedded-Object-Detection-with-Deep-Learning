@@ -17,24 +17,23 @@ from six.moves import xrange
 import tensorflow as tf
 
 from config import *
-from dataset import pascal_voc, kitti
+from dataset import pascal_voc, kitti, ball
 from utils.util import bbox_transform, Timer
 from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('dataset', 'KITTI',
-                           """Currently support PASCAL_VOC or KITTI dataset.""")
-tf.app.flags.DEFINE_string('data_path', '', """Root directory of data""")
-tf.app.flags.DEFINE_string('image_set', 'test',
-                           """Only used for VOC data."""
+# tf.app.flags.DEFINE_string('dataset', 'KITTI', """Currently support PASCAL_VOC or KITTI dataset.""")
+tf.app.flags.DEFINE_string('dataset', 'BALL',""" """)
+tf.app.flags.DEFINE_string('data_path', 'D:\\Humanoid\\squeezeDet\\squeezeDet-master\\data\\val\\', """Root directory of data""")
+
+tf.app.flags.DEFINE_string('image_set', 'val',                          
                            """Can be train, trainval, val, or test""")
-tf.app.flags.DEFINE_string('year', '2007',
-                            """VOC challenge year. 2007 or 2012"""
-                            """Only used for VOC data""")
-tf.app.flags.DEFINE_string('eval_dir', '/tmp/bichen/logs/squeezeDet/eval',
+
+tf.app.flags.DEFINE_string('eval_dir', 'logs\\squeezeDet\\val',
                             """Directory where to write event logs """)
-tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/bichen/logs/squeezeDet/train',
+
+tf.app.flags.DEFINE_string('checkpoint_path', '.\\logs\\squeezeDet\\train',#'/tmp/bichen/logs/squeezeDet/train',
                             """Path to the training checkpoint.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 1,
                              """How often to check if new cpt is saved.""")
@@ -45,9 +44,7 @@ tf.app.flags.DEFINE_string('net', 'squeezeDet',
 tf.app.flags.DEFINE_string('gpu', '0', """gpu id.""")
 
 
-def eval_once(
-    saver, ckpt_path, summary_writer, eval_summary_ops, eval_summary_phs, imdb,
-    model):
+def eval_once(saver, ckpt_path, summary_writer, eval_summary_ops, eval_summary_phs, imdb, model):
 
   with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 
@@ -112,7 +109,7 @@ def eval_once(
     feed_dict = {}
     for cls, ap in zip(ap_names, aps):
       feed_dict[eval_summary_phs['APs/'+cls]] = ap
-      print ('    {}: {:.3f}'.format(cls, ap))
+      print ('    {}: {:.3f}'.format(cls,ap))
 
     print ('    Mean average precision: {:.3f}'.format(np.mean(aps)))
     feed_dict[eval_summary_phs['APs/mAP']] = np.mean(aps)
@@ -134,53 +131,38 @@ def eval_once(
       summary_writer.add_summary(sum_str, global_step)
 
 def evaluate():
-  """Evaluate."""
-  assert FLAGS.dataset == 'KITTI', \
-      'Currently only supports KITTI dataset'
+  """Evaluate."""  
 
   os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
 
   with tf.Graph().as_default() as g:
 
-    assert FLAGS.net == 'vgg16' or FLAGS.net == 'resnet50' \
-        or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
-        'Selected neural net architecture not supported: {}'.format(FLAGS.net)
-    if FLAGS.net == 'vgg16':
-      mc = kitti_vgg16_config()
-      mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
-      mc.LOAD_PRETRAINED_MODEL = False
-      model = VGG16ConvDet(mc)
-    elif FLAGS.net == 'resnet50':
-      mc = kitti_res50_config()
-      mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
-      mc.LOAD_PRETRAINED_MODEL = False
-      model = ResNet50ConvDet(mc)
-    elif FLAGS.net == 'squeezeDet':
-      mc = kitti_squeezeDet_config()
+    if FLAGS.net == 'squeezeDet':
+      mc = ball_config()
       mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
       mc.LOAD_PRETRAINED_MODEL = False
       model = SqueezeDet(mc)
     elif FLAGS.net == 'squeezeDet+':
-      mc = kitti_squeezeDetPlus_config()
+      mc = ball_config()
       mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
       mc.LOAD_PRETRAINED_MODEL = False
       model = SqueezeDetPlus(mc)
 
-    imdb = kitti(FLAGS.image_set, FLAGS.data_path, mc)
+    imdb = ball(FLAGS.image_set, FLAGS.data_path, mc)
 
     # add summary ops and placeholders
     ap_names = []
-    for cls in imdb.classes:
-      ap_names.append(cls+'_easy')
-      ap_names.append(cls+'_medium')
-      ap_names.append(cls+'_hard')
+    # for cls in imdb.classes:
+      # ap_names.append(cls+'_easy')
+      # ap_names.append(cls+'_medium')
+      # ap_names.append(cls+'_hard')
 
     eval_summary_ops = []
     eval_summary_phs = {}
-    for ap_name in ap_names:
-      ph = tf.placeholder(tf.float32)
-      eval_summary_phs['APs/'+ap_name] = ph
-      eval_summary_ops.append(tf.summary.scalar('APs/'+ap_name, ph))
+    # for ap_name in ap_names:
+    ph = tf.placeholder(tf.float32)
+    eval_summary_phs['APs'] = ph
+    eval_summary_ops.append(tf.summary.scalar('APs', ph))
 
     ph = tf.placeholder(tf.float32)
     eval_summary_phs['APs/mAP'] = ph
@@ -222,9 +204,10 @@ def evaluate():
         if ckpt and ckpt.model_checkpoint_path:
           if ckpt.model_checkpoint_path in ckpts:
             # Do not evaluate on the same checkpoint
-            print ('Wait {:d}s for new checkpoints to be saved ... '
-                      .format(FLAGS.eval_interval_secs))
-            time.sleep(FLAGS.eval_interval_secs)
+            # print ('Wait {:d}s for new checkpoints to be saved ... '
+            #           .format(FLAGS.eval_interval_secs))
+            # time.sleep(FLAGS.eval_interval_secs)
+            break
           else:
             ckpts.add(ckpt.model_checkpoint_path)
             print ('Evaluating {}...'.format(ckpt.model_checkpoint_path))
