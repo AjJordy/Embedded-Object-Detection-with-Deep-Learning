@@ -21,12 +21,9 @@ STATIC EVALUATION PARAMETERS
 string ospj( string const & a, string const & b ) { return a + "/" + b; }
 string ospj( string const & a, string const & b, string const & c ) { return a + "/" + b + "/" + c; }
 
-// easy, moderate and hard evaluation level
-// enum DIFFICULTY{EASY=0, MODERATE=1, HARD=2};
 
 // evaluation parameter
 const int32_t MIN_HEIGHT[3]     = {40, 25, 25};     // minimum height for evaluated groundtruth/detections
-const int32_t MAX_OCCLUSION[3]  = {0, 1, 2};        // maximum occlusion level of the groundtruth used for evaluation
 const double  MAX_TRUNCATION[3] = {0.15, 0.3, 0.5}; // maximum truncation level of the groundtruth used for evaluation
 
 // evaluated object classes
@@ -40,10 +37,7 @@ const double   MIN_OVERLAP[3] = {0.7, 0.5, 0.5};                  // the minimum
 const double N_SAMPLE_PTS = 41;
 
 // initialize class names
-void initGlobals () {
-  // CLASS_NAMES.push_back("car");
-  // CLASS_NAMES.push_back("pedestrian");
-  // CLASS_NAMES.push_back("cyclist");
+void initGlobals () { 
   CLASS_NAMES.push_back("ball");
 }
 
@@ -53,13 +47,12 @@ DATA TYPES FOR EVALUATION
 
 // holding data needed for precision-recall and precision-aos
 struct tPrData {
-  vector<double> v;           // detection score for computing score thresholds
-  double         similarity;  // orientation similarity
+  vector<double> v;           // detection score for computing score thresholds  
   int32_t        tp;          // true positives
   int32_t        fp;          // false positives
   int32_t        fn;          // false negatives
   tPrData () :
-    similarity(0), tp(0), fp(0), fn(0) {}
+    tp(0), fp(0), fn(0) {}
 };
 
 // holding bounding boxes for ground truth and detections
@@ -68,23 +61,20 @@ struct tBox {
   double   x1;      // left corner
   double   y1;      // top corner
   double   x2;      // right corner
-  double   y2;      // bottom corner
-  double   alpha;   // image orientation
-  tBox (string type, double x1,double y1,double x2,double y2,double alpha) :
-    type(type),x1(x1),y1(y1),x2(x2),y2(y2),alpha(alpha) {}
+  double   y2;      // bottom corner  
+  tBox (string type, double x1,double y1,double x2,double y2): 
+    type(type),x1(x1),y1(y1),x2(x2),y2(y2) {} 
 };
 
 // holding ground truth data
 struct tGroundtruth {
-  tBox    box;        // object type, box, orientation
-  double  truncation; // truncation 0..1
-  int32_t occlusion;  // occlusion 0,1,2 (non, partly, fully)
+  tBox    box;        // object type, box, orientation  
   tGroundtruth () :
-    box(tBox("invalild",-1,-1,-1,-1,-10)),truncation(-1),occlusion(-1) {}
-  tGroundtruth (tBox box,double truncation,int32_t occlusion) :
-    box(box),truncation(truncation),occlusion(occlusion) {}
-  tGroundtruth (string type,double x1,double y1,double x2,double y2,double alpha,double truncation,int32_t occlusion) :
-    box(tBox(type,x1,y1,x2,y2,alpha)),truncation(truncation),occlusion(occlusion) {}
+    box(tBox("invalild",-1,-1,-1,-1)) {} 
+  tGroundtruth (tBox box): 
+    box(box) {} 
+  tGroundtruth (string type,double x1,double y1,double x2,double y2,double): 
+    box(tBox(type,x1,y1,x2,y2)) {} 
 };
 
 // holding detection data
@@ -92,18 +82,18 @@ struct tDetection {
   tBox    box;    // object type, box, orientation
   double  thresh; // detection score
   tDetection ():
-    box(tBox("invalid",-1,-1,-1,-1,-10)),thresh(-1000) {}
+    box(tBox("invalid",-1,-1,-1,-1)),thresh(-1000) {} //,-10)),thresh(-1000) {}
   tDetection (tBox box,double thresh) :
     box(box),thresh(thresh) {}
-  tDetection (string type,double x1,double y1,double x2,double y2,double alpha,double thresh) :
-    box(tBox(type,x1,y1,x2,y2,alpha)),thresh(thresh) {}
+  tDetection (string type,double x1,double y1,double x2,double y2, double thresh): //,double alpha,double thresh) :
+    box(tBox(type,x1,y1,x2,y2)),thresh(thresh){}  //,alpha)),thresh(thresh) {}
 };
 
 /*=======================================================================
 FUNCTIONS TO LOAD DETECTION AND GROUND TRUTH DATA ONCE, SAVE RESULTS
 =======================================================================*/
 
-vector<tDetection> loadDetections(string file_name, bool &compute_aos,  bool &eval_ball, bool &success) {
+vector<tDetection> loadDetections(string file_name, bool &eval_ball, bool &success) {
 
   // holds all detections (ignored detections are indicated by an index vector
   vector<tDetection> detections;
@@ -116,17 +106,10 @@ vector<tDetection> loadDetections(string file_name, bool &compute_aos,  bool &ev
     tDetection d;
     double trash;
     char str[255];
-    if (fscanf(fp, "%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                   str, &trash,    &trash,    &d.box.alpha,
-                   &d.box.x1,   &d.box.y1, &d.box.x2, &d.box.y2,
-                   &trash,      &trash,    &trash,    &trash,
-                   &trash,      &trash,    &trash,    &d.thresh )==16) {
+    if (fscanf(fp, "%s %lf %lf %lf %lf",
+                   str, &d.box.x1, &d.box.y1, &d.box.x2, &d.box.y2)==5) {
       d.box.type = str;
-      detections.push_back(d);
-
-      // orientation=-10 is invalid, AOS is not evaluated if at least one orientation is invalid
-      if(d.box.alpha==-10)
-        compute_aos = false;
+      detections.push_back(d);      
 
       // a class is only evaluated if it is detected at least once
       if(!eval_ball && !strcasecmp(d.box.type.c_str(), "ball"))
@@ -152,11 +135,8 @@ vector<tGroundtruth> loadGroundtruth(string file_name,bool &success) {
     tGroundtruth g;
     double trash;
     char str[255];
-    if (fscanf(fp, "%s %lf %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                   str, &g.truncation, &g.occlusion, &g.box.alpha,
-                   &g.box.x1,   &g.box.y1,     &g.box.x2,    &g.box.y2,
-                   &trash,      &trash,        &trash,       &trash,
-                   &trash,      &trash,        &trash )==15) {
+    if (fscanf(fp, "%s %lf %lf %lf %lf",
+                   str, &g.box.x1,   &g.box.y1,     &g.box.x2,    &g.box.y2,)==5) {
       g.box.type = str;
       groundtruth.push_back(g);
     }
@@ -166,7 +146,7 @@ vector<tGroundtruth> loadGroundtruth(string file_name,bool &success) {
   return groundtruth;
 }
 
-void saveStats (const vector<double> &precision, const vector<double> &aos, FILE *fp_det, FILE *fp_ap, FILE *fp_ori) {
+void saveStats (const vector<double> &precision, FILE *fp_det, FILE *fp_ap) {
 
   // save precision to file
   if(precision.empty())
@@ -182,14 +162,8 @@ void saveStats (const vector<double> &precision, const vector<double> &aos, FILE
   assert( AP_cnt == 11 );
   AP /= double( AP_cnt );
   fprintf(fp_ap, "AP=%s\n", str(AP).c_str() );
-  fprintf(fp_det,"\n");
-
-  // save orientation similarity, only if there were no invalid orientation entries in submission (alpha=-10)
-  if(aos.empty())
-    return;
-  for (int32_t i=0; i<aos.size(); i++)
-    fprintf(fp_ori,"%f ",aos[i]);
-  fprintf(fp_ori,"\n");
+  fprintf(fp_det,"\n"); 
+  
 }
 
 /*=======================================================================
@@ -332,11 +306,10 @@ void cleanData(CLASSES current_class, const vector<tGroundtruth> &gt, const vect
   }
 }
 
-tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt, const vector<tDetection> &det, const vector<tGroundtruth> &dc, const vector<int32_t> &ignored_gt, const vector<int32_t>  &ignored_det, bool compute_fp, bool compute_aos=false, double thresh=0, bool debug=false){
+tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt, const vector<tDetection> &det, const vector<tGroundtruth> &dc, const vector<int32_t> &ignored_gt, const vector<int32_t>  &ignored_det, bool compute_fp, double thresh=0, bool debug=false){
 
   tPrData stat = tPrData();
   const double NO_DETECTION = -10000000;
-  vector<double> delta;            // holds angular difference for TPs (needed for AOS evaluation)
   vector<bool> assigned_detection; // holds wether a detection was assigned to a valid or ignored ground truth
   assigned_detection.assign(det.size(), false);
   vector<bool> ignored_threshold;
@@ -417,10 +390,7 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
       stat.tp++;
       stat.v.push_back(det[det_idx].thresh);
 
-      // compute angular difference of detection and ground truth if valid detection orientation was provided
-      if(compute_aos)
-        delta.push_back(gt[i].box.alpha - det[det_idx].box.alpha);
-
+      
       // clean up
       assigned_detection[det_idx] = true;
     }
@@ -461,28 +431,7 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
 
     // FP = no. of all not to ground truth assigned detections - detections assigned to stuff areas
     stat.fp -= nstuff;
-
-    // if all orientation values are valid, the AOS is computed
-    if(compute_aos){
-      vector<double> tmp;
-
-      // FP have a similarity of 0, for all TP compute AOS
-      tmp.assign(stat.fp, 0);
-      for(int32_t i=0; i<delta.size(); i++)
-        tmp.push_back((1.0+cos(delta[i]))/2.0);
-
-      // be sure, that all orientation deltas are computed
-      assert(tmp.size()==stat.fp+stat.tp);
-      assert(delta.size()==stat.tp);
-
-      // get the mean orientation similarity for this image
-      if(stat.tp>0 || stat.fp>0)
-        stat.similarity = accumulate(tmp.begin(), tmp.end(), 0.0);
-
-      // there was neither a FP nor a TP, so the similarity is ignored in the evaluation
-      else
-        stat.similarity = -1;
-    }
+    
   }
   return stat;
 }
@@ -491,7 +440,7 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
 EVALUATE CLASS-WISE
 =======================================================================*/
 
-bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,const vector< vector<tGroundtruth> > &groundtruth,const vector< vector<tDetection> > &detections, bool compute_aos, vector<double> &precision, vector<double> &aos, int32_t N_TESTIMAGES) {
+bool eval_class (FILE *fp_det, FILE *fp_ap, CLASSES current_class,const vector< vector<tGroundtruth> > &groundtruth,const vector< vector<tDetection> > &detections, vector<double> &precision, int32_t N_TESTIMAGES) {
 
   // init
   int32_t n_gt=0;                                     // total no. of gt (denominator of recall)
@@ -533,44 +482,39 @@ bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,
     for(int32_t t=0; t<thresholds.size(); t++){
       tPrData tmp = tPrData();
       tmp = computeStatistics(current_class, groundtruth[i], detections[i], dontcare[i],
-                              ignored_gt[i], ignored_det[i], true, compute_aos, thresholds[t], t==38);
+                              ignored_gt[i], ignored_det[i], true, thresholds[t], t==38);
 
       // add no. of TP, FP, FN, AOS for current frame to total evaluation for current threshold
       pr[t].tp += tmp.tp;
       pr[t].fp += tmp.fp;
       pr[t].fn += tmp.fn;
-      if(tmp.similarity!=-1)
-        pr[t].similarity += tmp.similarity;
+      
     }
   }
 
   // compute recall, precision and AOS
   vector<double> recall;
   precision.assign(N_SAMPLE_PTS, 0);
-  if(compute_aos)
-    aos.assign(N_SAMPLE_PTS, 0);
+  
   double r=0;
   for (int32_t i=0; i<thresholds.size(); i++){
     r = pr[i].tp/(double)(pr[i].tp + pr[i].fn);
     recall.push_back(r);
     precision[i] = pr[i].tp/(double)(pr[i].tp + pr[i].fp);
-    if(compute_aos)
-      aos[i] = pr[i].similarity/(double)(pr[i].tp + pr[i].fp);
+    
   }
 
   // filter precision and AOS using max_{i..end}(precision)
   for (int32_t i=0; i<thresholds.size(); i++){
-    precision[i] = *max_element(precision.begin()+i, precision.end());
-    if(compute_aos)
-      aos[i] = *max_element(aos.begin()+i, aos.end());
+    precision[i] = *max_element(precision.begin()+i, precision.end());    
   }
 
   // save statisics and finish with success
-  saveStats(precision, aos, fp_det, fp_ap, fp_ori);
+  saveStats(precision, fp_det, fp_ap);//, fp_ori);
 	return true;
 }
 
-void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<double> vals[],bool is_aos){
+void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<double> vals[]){ 
 
   char command[1024];
 
@@ -600,8 +544,7 @@ void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<do
     fprintf(fp,"set xrange [0:1]\n");
     fprintf(fp,"set yrange [0:1]\n");
     fprintf(fp,"set xlabel \"Recall\"\n");
-    if (!is_aos) fprintf(fp,"set ylabel \"Precision\"\n");
-    else         fprintf(fp,"set ylabel \"Orientation Similarity\"\n");
+    
     obj_type[0] = toupper(obj_type[0]);
     fprintf(fp,"set title \"%s\"\n",obj_type.c_str());
 
@@ -611,6 +554,7 @@ void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<do
 
     // plot error curve
     fprintf(fp,"plot ");
+    fprintf(fp,"\"%s.txt\" using 1:2 title 'ball' with lines ls 1 lw %d,",file_name.c_str(),lw);
     // fprintf(fp,"\"%s.txt\" using 1:2 title 'Easy' with lines ls 1 lw %d,",file_name.c_str(),lw);
     // fprintf(fp,"\"%s.txt\" using 1:3 title 'Moderate' with lines ls 2 lw %d,",file_name.c_str(),lw);
     // fprintf(fp,"\"%s.txt\" using 1:4 title 'Hard' with lines ls 3 lw %d",file_name.c_str(),lw);
@@ -639,7 +583,7 @@ bool eval(string const & result_dir, string const & image_set_filename, string c
 
   // ground truth and result directories
 //  string result_dir     = "results/" + result_sha;
-  string plot_dir       = result_dir + "/plot";
+  string plot_dir = result_dir + "/plot";
 
   // create output directories
   system(("mkdir " + plot_dir).c_str());
@@ -650,7 +594,7 @@ bool eval(string const & result_dir, string const & image_set_filename, string c
 
   // holds wether orientation similarity shall be computed (might be set to false while loading detections)
   // and which labels where provided by this submission
-  bool compute_aos=true, eval_ball=false;
+  bool eval_ball=false;
 
   // get image names
   FILE *fp = fopen( image_set_filename.c_str(),"r" );
@@ -682,7 +626,7 @@ bool eval(string const & result_dir, string const & image_set_filename, string c
     // read ground truth and result poses
     bool gt_success,det_success;
     vector<tGroundtruth> gt   = loadGroundtruth(ospj(gt_dir,file_name),gt_success);
-    vector<tDetection>   det  = loadDetections(ospj(result_dir,"data",file_name), compute_aos, eval_ball,det_success);
+    vector<tDetection>   det  = loadDetections(ospj(result_dir,"data",file_name), eval_ball,det_success);
     groundtruth.push_back(gt);
     detections.push_back(det);
 
@@ -699,26 +643,22 @@ bool eval(string const & result_dir, string const & image_set_filename, string c
   mail->msg("  done.");
 
   // holds pointers for result files
-  FILE *fp_det=0, *fp_ap=0, *fp_ori=0;
+  FILE *fp_det=0, *fp_ap=0;
 
   // eval ball
   if(eval_ball){
     fp_det = fopen((result_dir + "/stats_" + CLASS_NAMES[BALL] + "_detection.txt").c_str(),"w");
     fp_ap = fopen((result_dir + "/stats_" + CLASS_NAMES[BALL] + "_ap.txt").c_str(),"w");
-    if(compute_aos)
-      fp_ori = fopen((result_dir + "/stats_" + CLASS_NAMES[BALL] + "_orientation.txt").c_str(),"w");
-    vector<double> precision[3], aos[3];
-    if( !eval_class(fp_det,fp_ap,fp_ori,BALL,groundtruth,detections,compute_aos,precision[0],aos[0],N_TESTIMAGES)){
+    
+    vector<double> precision[3]; 
+    if( !eval_class(fp_det,fp_ap,BALL,groundtruth,detections,precision[0],N_TESTIMAGES)){
       mail->msg("Ball evaluation failed.");
       return false;
     }
     fclose(fp_det);
     fclose(fp_ap);
     saveAndPlotPlots(plot_dir,CLASS_NAMES[BALL] + "_detection",CLASS_NAMES[BALL],precision,0);
-    if(compute_aos){
-      saveAndPlotPlots(plot_dir,CLASS_NAMES[BALL] + "_orientation",CLASS_NAMES[BALL],aos,1);
-      fclose(fp_ori);
-    }
+    
   }
 
 

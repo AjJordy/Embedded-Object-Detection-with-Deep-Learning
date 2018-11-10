@@ -1,3 +1,5 @@
 data/
 logs/squeezeDet/val
 logs/squeezeDet/train/events.out.tfevents.1540496900.DESKTOP-JORDY
+src/eval/
+src/eval-keras.py
